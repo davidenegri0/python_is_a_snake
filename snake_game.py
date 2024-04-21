@@ -31,6 +31,8 @@ direction = 'left'
 
 print(f"Initial player pos -> X: {player_pos.x} | Y: {player_pos.y}")
 
+grass = pygame.image.load("grass.jpg")
+
 playerSnake = []
 for i in range (0, SNAKE_INIT):
     Rect = pygame.Rect(PLAYER_SIZE,PLAYER_SIZE,PLAYER_SIZE,PLAYER_SIZE)
@@ -136,7 +138,6 @@ while running:
             headRect.y = player_pos.y
             
             if check_game_over(headRect, playerSnake):                
-                screen.blit(game_over_screen, (screen.get_width() / 2 - game_over_screen.get_width() / 2, 32))
                 direction = 'none'
                 running = False
             
@@ -153,6 +154,10 @@ while running:
             # print(check_food_eaten(food, playerSnake[0]))
 
     # RENDER YOUR GAME HERE
+    for y in range(0, screen.get_height(), grass.get_height()):
+        for x in range(0, screen.get_width(), grass.get_width()):
+            screen.blit(grass, (x,y))
+    
     for i in range(0, len(playerSnake)):
         pygame.draw.rect(surface=screen, color="green", rect=playerSnake[i])
     
@@ -163,5 +168,8 @@ while running:
 
     clock.tick(60)  # limits FPS to 60
 
-if direction=="none": pygame.time.wait(2000)
+if direction=="none": 
+    screen.blit(game_over_screen, (screen.get_width() / 2 - game_over_screen.get_width() / 2, 32))
+    pygame.display.flip()
+    pygame.time.wait(2000)
 pygame.quit()
