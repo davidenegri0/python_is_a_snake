@@ -35,6 +35,23 @@ player_pos = pygame.Vector2(int(n_grid_x / 2) * PLAYER_SIZE , int(n_grid_y / 2) 
 pygame.time.set_timer(pygame.USEREVENT, speed)
 direction = 'left'
 
+# CLASSES
+class Egg(pygame.sprite.Sprite):
+    def __init__(self, rect):
+        # Call the parent class (Sprite) constructor
+        pygame.sprite.Sprite.__init__(self)
+
+        # This could also be an image loaded from the disk.
+        self.image = pygame.image.load("egg.png")
+        self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
+
+        # Fetch the rectangle object that has the dimensions of the image
+        # Update the position of this object by setting the values of rect.x and rect.y
+        if rect is not None:
+            self.rect = rect
+        else:
+            self.rect = self.image.get_rect()
+
 class Snake_part(pygame.sprite.Sprite):
     def __init__(self, image, rect=None, direction='left'):
         # Call the parent class (Sprite) constructor
@@ -115,6 +132,7 @@ def spawn_food(snake):
         return spawn_food(snake)
     
 foodPos = spawn_food(playerSnake)
+egg = Egg(foodPos)
 print(f"Foods pos -> X: {foodPos.x} | Y: {foodPos.y}")
 
 while running:
@@ -215,8 +233,9 @@ while running:
     # for i in range(0, len(playerSnake)):
     #     pygame.draw.rect(surface=screen, color="green", rect=playerSnake[i])
     
-    pygame.draw.circle(screen, "red", (foodPos.x + PLAYER_SIZE/2, foodPos.y + PLAYER_SIZE/2), PLAYER_SIZE / 3)
+    screen.blit(egg.image, (foodPos.x, foodPos.y))
     snake.draw(screen)
+
     if direction=="none":
         screen.blit(game_over_screen, (screen.get_width() / 2 - game_over_screen.get_width() / 2, 32))
         final_score_screen = font.render(f"Final score: {score}", True, "black")
