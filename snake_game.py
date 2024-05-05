@@ -1,11 +1,10 @@
 import pygame
 import random
+from settings import PLAYER_SIZE, SNAKE_INIT_SIZE, DEBUG
+from settings import GRASS_SPRITE, SNAKE_HEAD_SPRITE, SNAKE_BODY_SPRITE, SNAKE_TAIL_SPRITE, MUSIC
+from sprites_classes import Egg, Snake_part
 
 # VARIABLES
-DEBUG = False
-PLAYER_SIZE = 64
-SNAKE_INIT = 3
-
 score = 0
 speed = 500
 
@@ -13,93 +12,52 @@ speed = 500
 pygame.init()
 pygame.display.set_caption("Python is a Snake")
 
+# Screen size setup
 screen = pygame.display.set_mode((832, 640))
+
+# Text overlays setup
 font = pygame.font.Font(pygame.font.get_default_font(), 36)
 score_screen = font.render(f"Score: {score}", True, "black")    
 game_over_screen = font.render("Game Over", True, "black")
-grass = pygame.image.load("grass.jpg")
 
-pygame.mixer.music.load("8-bit-arcade.mp3")
+# Background load and setup
+grass = pygame.image.load(GRASS_SPRITE)
+
+# Music setup
+pygame.mixer.music.load(MUSIC)
 pygame.mixer.music.play(-1)
 
+# Game loop basic configuration
 clock = pygame.time.Clock()
 running = True
 
+# Grid setup
 n_grid_y = screen.get_height() / PLAYER_SIZE
 n_grid_x = screen.get_width() / PLAYER_SIZE
-
 SCREEN_OVERSIZE_V = screen.get_height() % PLAYER_SIZE
 SCREEN_OVERSIZE_O = screen.get_width() % PLAYER_SIZE
 
+# Player movement setup
 player_pos = pygame.Vector2(int(n_grid_x / 2) * PLAYER_SIZE , int(n_grid_y / 2) * PLAYER_SIZE)
 pygame.time.set_timer(pygame.USEREVENT, speed)
 direction = 'left'
-
-# CLASSES
-class Egg(pygame.sprite.Sprite):
-    def __init__(self, rect):
-        # Call the parent class (Sprite) constructor
-        pygame.sprite.Sprite.__init__(self)
-
-        # This could also be an image loaded from the disk.
-        self.image = pygame.image.load("egg.png")
-        self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
-
-        # Fetch the rectangle object that has the dimensions of the image
-        # Update the position of this object by setting the values of rect.x and rect.y
-        if rect is not None:
-            self.rect = rect
-        else:
-            self.rect = self.image.get_rect()
-
-class Snake_part(pygame.sprite.Sprite):
-    def __init__(self, image, rect=None, direction='left'):
-        # Call the parent class (Sprite) constructor
-        pygame.sprite.Sprite.__init__(self)
-
-        # This could also be an image loaded from the disk.
-        self.image = pygame.image.load(image)
-        self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
-
-        self.rotation = direction
-        if self.rotation == 'up':
-            self.image = pygame.transform.rotate(self.image, 270)
-        elif self.rotation == 'down':
-            self.image = pygame.transform.rotate(self.image, 90)
-        elif self.rotation == 'right':
-            self.image = pygame.transform.rotate(self.image, 180)
-
-        # Fetch the rectangle object that has the dimensions of the image
-        # Update the position of this object by setting the values of rect.x and rect.y
-        if rect is not None:
-            self.rect = rect
-        else:
-            self.rect = self.image.get_rect()
 
 snake = pygame.sprite.Group()
 
 # PLAYER INITIALIZATION (SNAKE)
 print(f"Initial player pos -> X: {player_pos.x} | Y: {player_pos.y}")
 playerSnake = []
-for i in range (0, SNAKE_INIT):
+for i in range (0, SNAKE_INIT_SIZE):
     if i == 0:
-        snk_p = Snake_part("snake_head.png")
-    elif i == SNAKE_INIT - 1:
-        snk_p = Snake_part("snake_tail.png")
+        snk_p = Snake_part(SNAKE_HEAD_SPRITE)
+    elif i == SNAKE_INIT_SIZE - 1:
+        snk_p = Snake_part(SNAKE_TAIL_SPRITE)
     else:
-        snk_p = Snake_part("snake_skin.png")
+        snk_p = Snake_part(SNAKE_BODY_SPRITE)
     snk_p.rect.x = player_pos.x + i * PLAYER_SIZE
     snk_p.rect.y = player_pos.y
     snake.add(snk_p)
-    # Rect = pygame.Rect(
-    #     player_pos.x + (i-1) * PLAYER_SIZE, 
-    #     player_pos.y, 
-    #     PLAYER_SIZE, 
-    #     PLAYER_SIZE)
-    # playerSnake.append(Rect)
-    # print(f"X: {playerSnake[i].x} | Y: {playerSnake[i].y}")
 
-# player_pos = pygame.Vector2(playerSnake[0].x, playerSnake[0].y)
 player_pos = pygame.Vector2(snake.sprites()[0].rect.x, snake.sprites()[0].rect.y)
 
 # FUNCTIONS
@@ -121,7 +79,8 @@ def spawn_food(snake):
     food_x = random.randint(1, n_grid_x-1) * PLAYER_SIZE - PLAYER_SIZE / 2
     food_y = random.randint(1, n_grid_y-1) * PLAYER_SIZE - PLAYER_SIZE / 2
     foodPos = pygame.Rect(food_x - PLAYER_SIZE/2, food_y - PLAYER_SIZE/2, PLAYER_SIZE, PLAYER_SIZE)
-    print(f"Food coord : {foodPos.x}, {foodPos.y}")
+    if DEBUG:
+        print(f"Food coord : {foodPos.x}, {foodPos.y}")
     if not check_game_over(foodPos, snake) :
         # food = pygame.draw.circle(screen, "red", (food_x, food_y), PLAYER_SIZE)       # QUA C'E' DA FIXARE
         if foodPos.x == 0 or foodPos.y == 0:
@@ -130,11 +89,14 @@ def spawn_food(snake):
             return foodPos
     else:
         return spawn_food(snake)
-    
+
+# FOOD INITIALIZATION
 foodPos = spawn_food(playerSnake)
 egg = Egg(foodPos)
-print(f"Foods pos -> X: {foodPos.x} | Y: {foodPos.y}")
+if DEBUG:
+    print(f"Foods pos -> X: {foodPos.x} | Y: {foodPos.y}")
 
+# Main game loop
 while running:
     if pygame.key.get_pressed()[pygame.K_ESCAPE]:
         running = False
@@ -201,8 +163,8 @@ while running:
             if DEBUG:
                 print(f"Head pos -> X: {headRect.x} | Y: {headRect.y}")
 
-            snake_sprites.insert(0, Snake_part("snake_head.png", headRect, direction))
-            snake_sprites[1] = Snake_part("snake_skin.png", snake_sprites[1].rect, snake_sprites[1].rotation)
+            snake_sprites.insert(0, Snake_part(SNAKE_HEAD_SPRITE, headRect, direction))
+            snake_sprites[1] = Snake_part(SNAKE_BODY_SPRITE, snake_sprites[1].rect, snake_sprites[1].rotation)
 
             if DEBUG:
                 for sprite in snake_sprites:
@@ -216,7 +178,7 @@ while running:
                 print(f"New foods pos -> X: {foodPos.x} | Y: {foodPos.y}")
             else:
                 snake_sprites.pop(-1)
-                snake_sprites[-1] = Snake_part("snake_tail.png", snake_sprites[-1].rect, snake_sprites[-2].rotation)
+                snake_sprites[-1] = Snake_part(SNAKE_TAIL_SPRITE, snake_sprites[-1].rect, snake_sprites[-2].rotation)
 
             if check_game_over(snake_sprites[0].rect, snake_sprites[1:]):                
                 direction = 'none'
@@ -229,9 +191,6 @@ while running:
     for y in range(0, screen.get_height(), grass.get_height()):
         for x in range(0, screen.get_width(), grass.get_width()):
             screen.blit(grass, (x,y))
-    
-    # for i in range(0, len(playerSnake)):
-    #     pygame.draw.rect(surface=screen, color="green", rect=playerSnake[i])
     
     screen.blit(egg.image, (foodPos.x, foodPos.y))
     snake.draw(screen)
