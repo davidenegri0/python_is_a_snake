@@ -1,5 +1,5 @@
 import pygame
-from settings import PLAYER_SIZE, EGG_SPRITE
+from settings import PLAYER_SIZE, EGG_SPRITE, get_path
 
 # CLASSES
 
@@ -9,7 +9,7 @@ class Egg(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         # This could also be an image loaded from the disk.
-        self.image = pygame.image.load(EGG_SPRITE)
+        self.image = pygame.image.load(get_path(EGG_SPRITE))
         self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
 
         # Fetch the rectangle object that has the dimensions of the image

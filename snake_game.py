@@ -1,7 +1,7 @@
 import pygame
 import random
-from settings import PLAYER_SIZE, SNAKE_INIT_SIZE, DEBUG
-from settings import GRASS_SPRITE, SNAKE_HEAD_SPRITE, SNAKE_BODY_SPRITE, SNAKE_TAIL_SPRITE, MUSIC
+import sys
+from settings import *
 from sprites_classes import Egg, Snake_part
 
 # VARIABLES
@@ -11,6 +11,7 @@ speed = 500
 # pygame setup
 pygame.init()
 pygame.display.set_caption("Python is a Snake")
+pygame.display.set_icon(pygame.image.load(get_path(EGG_SPRITE)))
 
 # Screen size setup
 screen = pygame.display.set_mode((832, 640))
@@ -21,10 +22,10 @@ score_screen = font.render(f"Score: {score}", True, "black")
 game_over_screen = font.render("Game Over", True, "black")
 
 # Background load and setup
-grass = pygame.image.load(GRASS_SPRITE)
+grass = pygame.image.load(get_path(GRASS_SPRITE))
 
 # Music setup
-pygame.mixer.music.load(MUSIC)
+pygame.mixer.music.load(get_path(MUSIC))
 pygame.mixer.music.play(-1)
 
 # Game loop basic configuration
@@ -49,11 +50,11 @@ print(f"Initial player pos -> X: {player_pos.x} | Y: {player_pos.y}")
 playerSnake = []
 for i in range (0, SNAKE_INIT_SIZE):
     if i == 0:
-        snk_p = Snake_part(SNAKE_HEAD_SPRITE)
+        snk_p = Snake_part(get_path(SNAKE_HEAD_SPRITE))
     elif i == SNAKE_INIT_SIZE - 1:
-        snk_p = Snake_part(SNAKE_TAIL_SPRITE)
+        snk_p = Snake_part(get_path(SNAKE_TAIL_SPRITE))
     else:
-        snk_p = Snake_part(SNAKE_BODY_SPRITE)
+        snk_p = Snake_part(get_path(SNAKE_BODY_SPRITE))
     snk_p.rect.x = player_pos.x + i * PLAYER_SIZE
     snk_p.rect.y = player_pos.y
     snake.add(snk_p)
@@ -163,8 +164,8 @@ while running:
             if DEBUG:
                 print(f"Head pos -> X: {headRect.x} | Y: {headRect.y}")
 
-            snake_sprites.insert(0, Snake_part(SNAKE_HEAD_SPRITE, headRect, direction))
-            snake_sprites[1] = Snake_part(SNAKE_BODY_SPRITE, snake_sprites[1].rect, snake_sprites[1].rotation)
+            snake_sprites.insert(0, Snake_part(get_path(SNAKE_HEAD_SPRITE), headRect, direction))
+            snake_sprites[1] = Snake_part(get_path(SNAKE_BODY_SPRITE), snake_sprites[1].rect, snake_sprites[1].rotation)
 
             if DEBUG:
                 for sprite in snake_sprites:
@@ -172,15 +173,17 @@ while running:
 
             if check_food_eaten(foodPos, snake_sprites[0].rect):
                 print("Food eaten")
+                pygame.mixer.Sound.play(pygame.mixer.Sound(get_path(EAT_EGG_SFX)))
                 score = score + 1
                 score_screen = font.render(f"Score: {score}", True, "black") 
                 foodPos = spawn_food(snake_sprites)
                 print(f"New foods pos -> X: {foodPos.x} | Y: {foodPos.y}")
             else:
                 snake_sprites.pop(-1)
-                snake_sprites[-1] = Snake_part(SNAKE_TAIL_SPRITE, snake_sprites[-1].rect, snake_sprites[-2].rotation)
+                snake_sprites[-1] = Snake_part(get_path(SNAKE_TAIL_SPRITE), snake_sprites[-1].rect, snake_sprites[-2].rotation)
 
-            if check_game_over(snake_sprites[0].rect, snake_sprites[1:]):                
+            if check_game_over(snake_sprites[0].rect, snake_sprites[1:]):
+                pygame.mixer.Sound.play(pygame.mixer.Sound(get_path(GAME_OVER_SFX)))                
                 direction = 'none'
                 running = False
 
