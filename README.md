@@ -19,11 +19,11 @@ Il gioco Snake è un videogioco in cui il giocatore controlla un serpente che si
 
 1. Clona questo repository:
     ```bash
-    git clone https://github.com/tuo-username/python_snake.git
+    git clone https://github.com/davidenegri0/python_is_a_snake.git
     ```
 2. Naviga nella directory del progetto:
     ```bash
-    cd python_snake
+    cd python_is_a_snake
     ```
 3. Installa le dipendenze richieste:
     ```bash
